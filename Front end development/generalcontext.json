@@ -1,0 +1,126 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+function RegisterForm() {
+  const [inputs, setInputs] = useState({
+    username: "",
+    email: "",
+    usertype: "", // "customer" | "admin" | "restaurant"
+    password: "",
+    restaurantAddress: "",
+    restaurantImage: ""
+  });
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setInputs({ ...inputs, [e.target.name]: e.target.value });
+  };
+
+  const register = async () => {
+    try {
+      const res = await axios.post("http://localhost:6001/register", inputs);
+
+      localStorage.setItem("userId", res.data._id);
+      localStorage.setItem("userType", res.data.usertype);
+      localStorage.setItem("username", res.data.username);
+      localStorage.setItem("email", res.data.email);
+
+      // Role-based redirect
+      if (res.data.usertype === "customer") {
+        navigate("/");
+      } else if (res.data.usertype === "admin") {
+        navigate("/admin");
+      } else if (res.data.usertype === "restaurant") {
+        navigate("/restaurant");
+      }
+    } catch (err) {
+      alert("Registration failed!");
+      console.error(err);
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <h2>Register for Foodie Express</h2>
+
+      <input
+        type="text"
+        name="username"
+        placeholder="Username"
+        onChange={handleChange}
+        style={styles.input}
+      />
+      <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        onChange={handleChange}
+        style={styles.input}
+      />
+      <input
+        type="text"
+        name="usertype"
+        placeholder="User Type (customer/admin/restaurant)"
+        onChange={handleChange}
+        style={styles.input}
+      />
+      <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        onChange={handleChange}
+        style={styles.input}
+      />
+      {inputs.usertype === "restaurant" && (
+        <>
+          <input
+            type="text"
+            name="restaurantAddress"
+            placeholder="Restaurant Address"
+            onChange={handleChange}
+            style={styles.input}
+          />
+          <input
+            type="text"
+            name="restaurantImage"
+            placeholder="Restaurant Image URL"
+            onChange={handleChange}
+            style={styles.input}
+          />
+        </>
+      )}
+      <button onClick={register} style={styles.button}>Register</button>
+    </div>
+  );
+}
+
+const styles = {
+  container: {
+    maxWidth: "400px",
+    margin: "auto",
+    padding: "20px",
+    background: "#fff",
+    borderRadius: "10px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+  },
+  input: {
+    width: "100%",
+    padding: "10px",
+    margin: "8px 0",
+    border: "1px solid #ccc",
+    borderRadius: "6px"
+  },
+  button: {
+    width: "100%",
+    padding: "10px",
+    background: "#ff6347",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer"
+  }
+};
+
+export default RegisterForm;
