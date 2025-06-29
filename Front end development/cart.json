@@ -1,0 +1,85 @@
+import React, { useState, useContext } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import CartContext from "../context/CartContext"; // assuming context for cart
+
+function Cart() {
+  const navigate = useNavigate();
+  const { cart, clearCart } = useContext(CartContext); // get cart and clearCart from context
+
+  // Order form fields
+  const [name, setName] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("COD"); // default to Cash On Delivery
+
+  const userId = localStorage.getItem("userId");
+
+  const placeOrder = async () => {
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    try {
+      const orderData = {
+        userId,
+        name,
+        mobile,
+        email,
+        address,
+        pincode,
+        paymentMethod,
+        orderDate: new Date(),
+        items: cart,
+      };
+
+      const response = await axios.post("http://localhost:6001/place-cart-order", orderData);
+
+      if (response.status === 200 || response.status === 201) {
+        alert("Order placed successfully!");
+
+        // Clear form fields
+        setName("");
+        setMobile("");
+        setEmail("");
+        setAddress("");
+        setPincode("");
+        setPaymentMethod("COD");
+
+        // Clear cart
+        clearCart();
+
+        // Navigate to profile/orders page
+        navigate("/profile");
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Something went wrong while placing the order.");
+    }
+  };
+
+  return (
+    <div>
+      <h2>Checkout</h2>
+
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" />
+      <input value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="Mobile Number" />
+      <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+      <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Address" />
+      <input value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="Pincode" />
+
+      <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+        <option value="COD">Cash On Delivery</option>
+        <option value="UPI">UPI</option>
+        <option value="Card">Credit/Debit Card</option>
+      </select>
+
+      <button onClick={placeOrder}>Place Order</button>
+    </div>
+  );
+}
+
+export default Cart;
