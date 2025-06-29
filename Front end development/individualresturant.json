@@ -1,0 +1,59 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+function FoodDeliveryDashboard() {
+  const [restaurant, setRestaurant] = useState(null);
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [items, setItems] = useState([]);
+  const [visibleItems, setVisibleItems] = useState([]);
+
+  // Fetch restaurant by ID
+  const fetchRestaurant = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:6001/fetch-restaurant/${id}`);
+      setRestaurant(response.data);
+      console.log("Restaurant:", response.data);
+    } catch (err) {
+      console.error("Failed to fetch restaurant:", err);
+    }
+  };
+
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get("http://localhost:8001/fetch-categories");
+      setAvailableCategories(response.data);
+      console.log("Categories:", response.data);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    }
+  };
+
+  // Fetch items
+  const fetchItems = async () => {
+    try {
+      const response = await axios.get("http://localhost:6001/fetch-items");
+      setItems(response.data);
+      setVisibleItems(response.data);
+      console.log("Items:", response.data);
+    } catch (err) {
+      console.error("Failed to fetch items:", err);
+    }
+  };
+
+  // Example: Fetch all on component mount
+  useEffect(() => {
+    fetchRestaurant("123abc"); // Replace with actual ID
+    fetchCategories();
+    fetchItems();
+  }, []);
+
+  return (
+    <div>
+      <h2>Welcome to the Food Delivery App</h2>
+      {/* Render restaurant, categories, and items as needed */}
+    </div>
+  );
+}
+
+export default FoodDeliveryDashboard;
